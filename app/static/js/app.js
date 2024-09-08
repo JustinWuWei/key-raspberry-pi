@@ -101,13 +101,16 @@ function keepKeyDown (direction, code) {
   if (!connected) {
     return;
   }
-
+  if (timer) {
+    console.assertlog("清除重复的timer");
+    clearInterval(timer);
+  }
 
   timer = setInterval(() => {
     addKeyCard(code, keystrokeId);
     processingQueue.push(keystrokeId);
     keystrokeId++;
-    console.log('direction:', direction);
+    console.log('direction1:', direction);
     socket.emit('keystroke', {
       metaKey: false,
       altKey: false,
