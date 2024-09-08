@@ -119,7 +119,7 @@ function keepKeyDown (direction, code) {
       keyCode: code,
       location: 0,
     });
-  }, 100);
+  }, 800);
 }
 
 function clearKeepPressTimer () {
