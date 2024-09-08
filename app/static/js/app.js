@@ -3,10 +3,10 @@
 const socket = io();
 let connected = false;
 let keystrokeId = 0;
-let isKeepPress = false;
+let timer = null;
 const processingQueue = [];
 
-function onSocketConnect() {
+function onSocketConnect () {
   connected = true;
   document.getElementById('status-connected').style.display = 'inline-block';
   document.getElementById('status-disconnected').style.display = 'none';
@@ -14,7 +14,7 @@ function onSocketConnect() {
   document.getElementById('disconnect-reason').style.visibility = 'hidden';
 }
 
-function onSocketDisconnect(reason) {
+function onSocketDisconnect (reason) {
   connected = false;
   document.getElementById('status-connected').style.display = 'none';
   document.getElementById('status-disconnected').style.display = 'inline-block';
@@ -23,14 +23,14 @@ function onSocketDisconnect(reason) {
   document.getElementById('instructions').style.visibility = 'hidden';
 }
 
-function limitRecentKeys(limit) {
+function limitRecentKeys (limit) {
   const recentKeysDiv = document.getElementById('recent-keys');
   while (recentKeysDiv.childElementCount > limit) {
     recentKeysDiv.removeChild(recentKeysDiv.firstChild);
   }
 }
 
-function addKeyCard(key, keystrokeId) {
+function addKeyCard (key, keystrokeId) {
   const card = document.createElement('div');
   card.classList.add('key-card');
   if (key === ' ') {
@@ -43,7 +43,7 @@ function addKeyCard(key, keystrokeId) {
   limitRecentKeys(10);
 }
 
-function updateKeyStatus(keystrokeId, success) {
+function updateKeyStatus (keystrokeId, success) {
   const recentKeysDiv = document.getElementById('recent-keys');
   const cards = recentKeysDiv.children;
   for (let i = 0; i < cards.length; i++) {
@@ -59,7 +59,7 @@ function updateKeyStatus(keystrokeId, success) {
   }
 }
 
-function onKeyDown(evt) {
+function onKeyDown (evt) {
   if (!connected) {
     return;
   }
@@ -76,7 +76,7 @@ function onKeyDown(evt) {
   } else if (evt.location === 2) {
     location = 'right';
   }
-  
+
   socket.emit('keystroke', {
     metaKey: evt.metaKey,
     altKey: evt.altKey,
@@ -88,7 +88,7 @@ function onKeyDown(evt) {
   });
 }
 
-function onDisplayHistoryChanged(evt) {
+function onDisplayHistoryChanged (evt) {
   if (evt.target.checked) {
     document.getElementById('recent-keys').style.visibility = 'visible';
   } else {
@@ -97,9 +97,18 @@ function onDisplayHistoryChanged(evt) {
   }
 }
 
-function keepKeyDown(direction, code) {
-  isKeepPress = !isKeepPress;
-  while (isKeepPress) {
+function keepKeyDown (direction, code) {
+  if (!connected) {
+    return;
+  }
+  if (!evt.metaKey) {
+    evt.preventDefault();
+    addKeyCard(evt.key, keystrokeId);
+    processingQueue.push(keystrokeId);
+    keystrokeId++;
+  }
+
+  timer = setInterval(() => {
     console.log('direction:', direction);
     socket.emit('keystroke', {
       metaKey: false,
@@ -110,7 +119,11 @@ function keepKeyDown(direction, code) {
       keyCode: code,
       location: 0,
     });
-  }
+  }, 100);
+}
+
+function clearKeepPressTimer () {
+  clearInterval(timer);
 }
 
 document.querySelector('body').addEventListener("keydown", onKeyDown);
