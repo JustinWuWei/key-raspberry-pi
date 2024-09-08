@@ -101,14 +101,12 @@ function keepKeyDown (direction, code) {
   if (!connected) {
     return;
   }
-  if (!evt.metaKey) {
-    evt.preventDefault();
-    addKeyCard(evt.key, keystrokeId);
-    processingQueue.push(keystrokeId);
-    keystrokeId++;
-  }
+
 
   timer = setInterval(() => {
+    addKeyCard(code, keystrokeId);
+    processingQueue.push(keystrokeId);
+    keystrokeId++;
     console.log('direction:', direction);
     socket.emit('keystroke', {
       metaKey: false,
@@ -119,7 +117,7 @@ function keepKeyDown (direction, code) {
       keyCode: code,
       location: 0,
     });
-  }, 800);
+  }, 1500);
 }
 
 function clearKeepPressTimer () {
