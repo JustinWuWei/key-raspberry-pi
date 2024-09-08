@@ -3,6 +3,7 @@
 const socket = io();
 let connected = false;
 let keystrokeId = 0;
+let isKeepPress = false;
 const processingQueue = [];
 
 function onSocketConnect() {
@@ -93,6 +94,22 @@ function onDisplayHistoryChanged(evt) {
   } else {
     document.getElementById('recent-keys').style.visibility = 'hidden';
     limitRecentKeys(0);
+  }
+}
+
+function keepKeyDown(direction, code) {
+  isKeepPress = !isKeepPress;
+  while (isKeepPress) {
+    console.log('direction:', direction);
+    socket.emit('keystroke', {
+      metaKey: false,
+      altKey: false,
+      shiftKey: false,
+      ctrlKey: false,
+      key: direction,
+      keyCode: code,
+      location: 0,
+    });
   }
 }
 
