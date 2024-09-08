@@ -102,7 +102,7 @@ function keepKeyDown (direction, code) {
     return;
   }
   if (timer) {
-    console.assertlog("清除重复的timer");
+    console.log("清除重复的timer");
     clearInterval(timer);
   }
 
@@ -110,7 +110,7 @@ function keepKeyDown (direction, code) {
     addKeyCard(code, keystrokeId);
     processingQueue.push(keystrokeId);
     keystrokeId++;
-    console.log('direction1:', direction);
+    console.log('direction:', direction);
     socket.emit('keystroke', {
       metaKey: false,
       altKey: false,
@@ -120,7 +120,7 @@ function keepKeyDown (direction, code) {
       keyCode: code,
       location: 0,
     });
-  }, 1500);
+  }, 10);
 }
 
 function clearKeepPressTimer () {
