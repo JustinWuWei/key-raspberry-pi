@@ -4,4 +4,4 @@ def send(hid_path, control_keys, hid_keycode):
         buf[0] = control_keys
         buf[2] = hid_keycode
         hid_handle.write(bytearray(buf))
-        hid_handle.write(bytearray([0] * 8))
+        # hid_handle.write(bytearray([0] * 8))
