@@ -124,7 +124,7 @@ function keepKeyDown (direction, code) {
 }
 
 function clearKeepPress () {
-  socket.emit('keyReset');
+  socket.emit('key-reset');
 }
 
 document.querySelector('body').addEventListener("keydown", onKeyDown);
