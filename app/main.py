@@ -58,6 +58,10 @@ def socket_keystroke(message):
 
     socketio.emit('keystroke-received', {'success': success})
 
+@socketio.on('keyReset')
+def socket_key_reset():
+        hid.reset(hid_path)
+
 
 @socketio.on('connect')
 def test_connect():

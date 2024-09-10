@@ -123,8 +123,8 @@ function keepKeyDown (direction, code) {
   // }, 1);
 }
 
-function clearKeepPressTimer () {
-  // clearInterval(timer);
+function clearKeepPress () {
+  socket.emit('keyReset');
 }
 
 document.querySelector('body').addEventListener("keydown", onKeyDown);

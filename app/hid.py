@@ -5,3 +5,7 @@ def send(hid_path, control_keys, hid_keycode):
         buf[2] = hid_keycode
         hid_handle.write(bytearray(buf))
         # hid_handle.write(bytearray([0] * 8))
+
+def reset(hid_path):
+    with open(hid_path, 'wb+') as hid_handle:
+        hid_handle.write(bytearray([0] * 8))
