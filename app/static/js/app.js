@@ -3,7 +3,7 @@
 const socket = io();
 let connected = false;
 let keystrokeId = 0;
-let timer = null;
+// let timer = null;
 const processingQueue = [];
 
 function onSocketConnect () {
@@ -101,12 +101,12 @@ function keepKeyDown (direction, code) {
   if (!connected) {
     return;
   }
-  if (timer) {
-    console.log("清除重复的timer");
-    clearInterval(timer);
-  }
+  // if (timer) {
+  //   console.log("清除重复的timer");
+  //   clearInterval(timer);
+  // }
 
-  timer = setInterval(() => {
+  // timer = setInterval(() => {
     addKeyCard(code, keystrokeId);
     processingQueue.push(keystrokeId);
     keystrokeId++;
@@ -120,11 +120,11 @@ function keepKeyDown (direction, code) {
       keyCode: code,
       location: 0,
     });
-  }, 1);
+  // }, 1);
 }
 
 function clearKeepPressTimer () {
-  clearInterval(timer);
+  // clearInterval(timer);
 }
 
 document.querySelector('body').addEventListener("keydown", onKeyDown);
