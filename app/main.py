@@ -60,7 +60,9 @@ def socket_keystroke(message):
 
 @socketio.on('key-reset')
 def socket_key_reset():
-        hid.reset(hid_path)
+    hid.reset(hid_path)
+    logger.info('reset key')
+    socketio.emit('keystroke-received', {'success': True})
 
 
 @socketio.on('connect')
