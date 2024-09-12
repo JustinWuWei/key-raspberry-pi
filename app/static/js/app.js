@@ -101,12 +101,6 @@ function keepKeyDown (direction, code) {
   if (!connected) {
     return;
   }
-  // if (timer) {
-  //   console.log("清除重复的timer");
-  //   clearInterval(timer);
-  // }
-
-  // timer = setInterval(() => {
     addKeyCard(code, keystrokeId);
     processingQueue.push(keystrokeId);
     keystrokeId++;
@@ -120,7 +114,6 @@ function keepKeyDown (direction, code) {
       keyCode: code,
       location: 0,
     });
-  // }, 1);
 }
 
 function clearKeepPress () {
@@ -128,6 +121,7 @@ function clearKeepPress () {
 }
 
 document.querySelector('body').addEventListener("keydown", onKeyDown);
+document.querySelector('body').addEventListener("keyup", clearKeepPress);
 document.getElementById('display-history-checkbox').addEventListener("change", onDisplayHistoryChanged);
 socket.on('connect', onSocketConnect);
 socket.on('disconnect', onSocketDisconnect);
