@@ -28,6 +28,7 @@ port = int(os.environ.get('PORT', 8000))
 debug = 'DEBUG' in os.environ
 # Location of HID file handle in which to write keyboard HID input.
 hid_path = os.environ.get('HID_PATH', '/dev/hidg0')
+keyboard = hid.KeyboardEmulator(hid_path)
 
 
 def _parse_key_event(payload):
@@ -38,9 +39,7 @@ def _parse_key_event(payload):
                                         key=payload['key'],
                                         key_code=payload['keyCode'])
 
-
-@socketio.on('keystroke')
-def socket_keystroke(message):
+def _handle_hid_key_event(message, is_key_press = True):
     key_event = _parse_key_event(message)
     hid_keycode = None
     success = False
@@ -53,16 +52,30 @@ def socket_keystroke(message):
         logger.info('Ignoring %s key (keycode=%d)', key_event.key,
                     key_event.key_code)
     else:
-        hid.send(hid_path, control_keys, hid_keycode)
+        if is_key_press:
+            keyboard.press_key(control_keys, hid_keycode)
+        else:
+            keyboard.release_key(control_keys, hid_keycode)
         success = True
 
     socketio.emit('keystroke-received', {'success': success})
+
+
+@socketio.on('keystroke')
+def socket_keystroke(message):
+    _handle_hid_key_event(message, True)
+
+
+@socketio.on('key-release')
+def socket_key_release(message):
+    _handle_hid_key_event(message, False)
+
 
 @socketio.on('key-reset')
 def socket_key_reset():
     hid.reset(hid_path)
     logger.info('reset key')
-    socketio.emit('keystroke-received', {'success': True})
+    socketio.emit('key-reset-received', {'success': True})
 
 
 @socketio.on('connect')

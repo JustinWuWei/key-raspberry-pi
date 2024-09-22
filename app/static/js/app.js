@@ -88,6 +88,29 @@ function onKeyDown (evt) {
   });
 }
 
+function onKetUp (evt) {
+  if (!connected) {
+    return;
+  }
+
+  let location = null;
+  if (evt.location === 1) {
+    location = 'left';
+  } else if (evt.location === 2) {
+    location = 'right';
+  }
+
+  socket.emit('key-release', {
+    metaKey: evt.metaKey,
+    altKey: evt.altKey,
+    shiftKey: evt.shiftKey,
+    ctrlKey: evt.ctrlKey,
+    key: evt.key,
+    keyCode: evt.keyCode,
+    location: location,
+  });
+}
+
 function onDisplayHistoryChanged (evt) {
   if (evt.target.checked) {
     document.getElementById('recent-keys').style.visibility = 'visible';
@@ -121,7 +144,7 @@ function clearKeepPress () {
 }
 
 document.querySelector('body').addEventListener("keydown", onKeyDown);
-document.querySelector('body').addEventListener("keyup", clearKeepPress);
+document.querySelector('body').addEventListener("keyup", onKetUp);
 document.getElementById('display-history-checkbox').addEventListener("change", onDisplayHistoryChanged);
 socket.on('connect', onSocketConnect);
 socket.on('disconnect', onSocketDisconnect);
