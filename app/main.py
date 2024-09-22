@@ -28,7 +28,7 @@ port = int(os.environ.get('PORT', 8000))
 debug = 'DEBUG' in os.environ
 # Location of HID file handle in which to write keyboard HID input.
 hid_path = os.environ.get('HID_PATH', '/dev/hidg0')
-keyboard = hid.KeyboardEmulator(hid_path)
+keyboard = hid.KeyboardEmulator(hid_path, logger)
 
 
 def _parse_key_event(payload):
