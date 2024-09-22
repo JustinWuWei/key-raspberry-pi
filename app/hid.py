@@ -5,9 +5,9 @@ import logging
 @dataclass
 class KeyboardEmulator:
     hid_path: str
+    logger: logging.Logger  # 接收传入的 Logger
     current_keys: List[int] = field(default_factory=list)  # 当前按住的按键
     control_keys: int = 0  # 修饰键状态
-    logger: logging.Logger  # 接收传入的 Logger
 
 
     def send(self):
