@@ -58,7 +58,8 @@ class KeyboardEmulator:
         :param hid_keycode: 普通按键键码（可选）
         """
         # 更新修饰键状态，使用按位与操作清除相应的修饰键
-        self.control_keys &= ~control_keys
+        if control_keys:
+            self.control_keys &= ~control_keys
 
         # 如果是普通按键，从 current_keys 中移除
         if hid_keycode and hid_keycode in self.current_keys:
