@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Dict
 import logging
+import time
+import json
+
 
 @dataclass
 class KeyboardEmulator:
@@ -8,6 +11,8 @@ class KeyboardEmulator:
     logger: logging.Logger  # 接收传入的 Logger
     current_keys: List[int] = field(default_factory=list)  # 当前按住的按键
     control_keys: int = 0  # 修饰键状态
+    recording: List[Dict] = field(default_factory=list)  # 用于存储录制的按键事件
+    is_record: bool = False
 
 
     def send(self):
@@ -41,6 +46,9 @@ class KeyboardEmulator:
 
         # 发送更新后的按键状态
         self.send()
+        if self.is_record:
+            self.__record_event(control_keys, hid_keycode, "press")
+
 
     def release_key(self, control_keys=0, hid_keycode=None):
         """
@@ -58,6 +66,9 @@ class KeyboardEmulator:
 
         # 发送更新后的按键状态
         self.send()
+        if self.is_record:
+            self.__record_event(control_keys, hid_keycode, "release")
+
 
     def release_all(self):
         """
@@ -66,3 +77,69 @@ class KeyboardEmulator:
         self.current_keys.clear()
         self.control_keys = 0
         self.send()
+
+
+    def start_record(self):
+        self.is_record = True
+
+
+    def save_record(self):
+        """
+        保存录制的按键事件到文件。
+        """
+        self.is_record = False
+         # 计算每个事件相对于第一个事件的时间差，转成相对时间戳
+        if self.recording:
+            start_time = self.recording[0]['timestamp']
+            for event in self.recording:
+                event['timestamp'] -= start_time
+
+        with open("testRecord.json", 'w') as f:
+            json.dump(self.recording, f, indent=4)
+
+        self.logger.info(f"Recording saved to testRecord.json")
+
+
+    def load_recording(self):
+        """
+        从文件加载录制的按键事件。
+        """
+        with open("testRecord.json", 'r') as f:
+            self.recording = json.load(f)
+        
+        self.logger.info(f"Recording loaded from testRecord.json")
+
+
+    def play_recording(self):
+        """
+        按照录制的顺序播放按键事件。
+        """
+        if not self.recording:
+            self.logger.warning("No recording loaded.")
+            return
+
+        start_time = time.time()
+
+        for event in self.recording:
+            # 计算需要等待的时间
+            time_to_wait = event['timestamp'] - (time.time() - start_time)
+            if time_to_wait > 0:
+                time.sleep(time_to_wait)
+            
+            if event['event'] == "press":
+                self.press_key(event['control_keys'], event['keycode'])
+            elif event['event'] == "release":
+                self.release_key(event['control_keys'], event['keycode'])
+
+        self.logger.info("Finished playing recording.")
+
+
+    def __record_event(self,control_keys, hid_keycode, event_type):
+        event = {
+            "timestamp": time.time(),
+            "event": event_type,
+            "control_keys": control_keys,
+            "keycode": hid_keycode
+        }
+        self.recording.append(event)
+        self.logger.info(f"Recorded event: {event}")
