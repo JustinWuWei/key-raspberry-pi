@@ -73,7 +73,7 @@ def socket_key_release(message):
 
 @socketio.on('key-reset')
 def socket_key_reset():
-    hid.reset(hid_path)
+    keyboard.release_all()
     logger.info('reset key')
     socketio.emit('key-reset-received', {'success': True})
 
