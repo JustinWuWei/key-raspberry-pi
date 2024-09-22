@@ -143,6 +143,22 @@ function clearKeepPress () {
   socket.emit('key-reset');
 }
 
+function startRecord () {
+  socket.emit('start-record');
+}
+
+function saveRecord () {
+  socket.emit('save-record');
+}
+
+function loadRecording () {
+  socket.emit('load-recording');
+}
+
+function playRecording () {
+  socket.emit('play-recording');
+}
+
 document.querySelector('body').addEventListener("keydown", onKeyDown);
 document.querySelector('body').addEventListener("keyup", onKetUp);
 document.getElementById('display-history-checkbox').addEventListener("change", onDisplayHistoryChanged);

@@ -78,6 +78,30 @@ def socket_key_reset():
     socketio.emit('key-reset-received', {'success': True})
 
 
+@socketio.on('start-record')
+def socket_start_record():
+    keyboard.start_record()
+    socketio.emit('start_record-received', {'success': True})
+
+
+@socketio.on('save-record')
+def socket_save_record():
+    keyboard.save_record()
+    socketio.emit('save_record-received', {'success': True})
+
+
+@socketio.on('load-recording')
+def socket_load_recording():
+    keyboard.load_recording()
+    socketio.emit('load_recording-received', {'success': True})
+
+
+@socketio.on('play-recording')
+def socket_play_recording():
+    keyboard.play_recording()
+    socketio.emit('play_recording-received', {'success': True})
+
+
 @socketio.on('connect')
 def test_connect():
     logger.info('Client connected')
