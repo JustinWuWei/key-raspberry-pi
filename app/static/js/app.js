@@ -60,6 +60,9 @@ function updateKeyStatus (keystrokeId, success) {
 }
 
 function onKeyDown (evt) {
+  if (evt.target.tagName === 'INPUT') {
+    return; // 如果是向input中输入，则直接返回
+  }
   if (!connected) {
     return;
   }
