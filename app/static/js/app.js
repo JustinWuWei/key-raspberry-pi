@@ -152,12 +152,12 @@ function startRecord () {
 }
 
 function saveRecord () {
-  const saveFileName = document.getElementById('save-record')
+  const saveFileName = document.getElementById('save-record').value
   socket.emit('save-record', saveFileName);
 }
 
 function loadRecording () {
-  const loadFileName = document.getElementById('load-record')
+  const loadFileName = document.getElementById('load-record').value
   socket.emit('load-recording', loadFileName);
 }
 
