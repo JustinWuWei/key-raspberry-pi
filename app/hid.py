@@ -13,6 +13,7 @@ class KeyboardEmulator:
     control_keys: int = 0  # 修饰键状态
     recording: List[Dict] = field(default_factory=list)  # 用于存储录制的按键事件
     is_record: bool = False
+    is_end_playing: bool = False
 
 
     def send(self):
@@ -82,12 +83,12 @@ class KeyboardEmulator:
         self.control_keys = 0
         self.send()
 
-
     def start_record(self):
+        self.recording = []
         self.is_record = True
 
 
-    def save_record(self):
+    def save_record(self, saveFileName = "testRecord.json"):
         """
         保存录制的按键事件到文件。
         """
@@ -97,21 +98,20 @@ class KeyboardEmulator:
             start_time = self.recording[0]['timestamp']
             for event in self.recording:
                 event['timestamp'] -= start_time
-
-        with open("testRecord.json", 'w') as f:
+        with open(saveFileName, 'w') as f:
             json.dump(self.recording, f, indent=4)
+        self.recording = []
+        self.logger.info(f"Recording saved to {saveFileName}")
 
-        self.logger.info(f"Recording saved to testRecord.json")
 
-
-    def load_recording(self):
+    def load_recording(self, loadFileName = "testRecord.json"):
         """
         从文件加载录制的按键事件。
         """
-        with open("testRecord.json", 'r') as f:
+        with open(loadFileName, 'r') as f:
             self.recording = json.load(f)
         
-        self.logger.info(f"Recording loaded from testRecord.json")
+        self.logger.info(f"Recording loaded from {loadFileName}")
 
 
     def play_recording(self):
@@ -125,6 +125,8 @@ class KeyboardEmulator:
         start_time = time.time()
 
         for event in self.recording:
+            if self.is_end_playing == True:
+                break
             # 计算需要等待的时间
             time_to_wait = event['timestamp'] - (time.time() - start_time)
             if time_to_wait > 0:
@@ -134,9 +136,16 @@ class KeyboardEmulator:
                 self.press_key(event['control_keys'], event['keycode'])
             elif event['event'] == "release":
                 self.release_key(event['control_keys'], event['keycode'])
-
+        if self.is_end_playing == True:
+            self.recording = []
+        self.is_end_playing = False
         self.logger.info("Finished playing recording.")
 
+    def end_playing(self):
+        """
+        清空正在播放的按键
+        """
+        self.is_end_playing = True
 
     def __record_event(self,control_keys, hid_keycode, event_type):
         event = {

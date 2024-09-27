@@ -148,11 +148,17 @@ function startRecord () {
 }
 
 function saveRecord () {
-  socket.emit('save-record');
+  const saveFileName = document.getElementById('save-record')
+  socket.emit('save-record', saveFileName);
 }
 
 function loadRecording () {
-  socket.emit('load-recording');
+  const loadFileName = document.getElementById('load-record')
+  socket.emit('load-recording', loadFileName);
+}
+
+function endPlaying () {
+  socket.emit('end-playing');
 }
 
 function playRecording () {
