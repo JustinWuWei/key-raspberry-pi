@@ -133,6 +133,7 @@ class KeyboardEmulator:
         for event in self.recording:
             if self.is_stop_playback.is_set():
                 self.logger.info("Playback stopped.")
+                self.release_all()
                 break
             # 计算需要等待的时间
             time_to_wait = event['timestamp'] - (time.time() - start_time)
