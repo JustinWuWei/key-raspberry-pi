@@ -28,6 +28,7 @@ port = int(os.environ.get('PORT', 8000))
 debug = 'DEBUG' in os.environ
 # Location of HID file handle in which to write keyboard HID input.
 hid_path = os.environ.get('HID_PATH', '/dev/hidg0')
+# hid_path = os.environ.get('HID_PATH', 'hidg0')
 keyboard = hid.KeyboardEmulator(hid_path, logger)
 
 
@@ -96,15 +97,16 @@ def socket_load_recording(loadFileName):
     socketio.emit('load-recording-received', {'success': True})
 
 
-@socketio.on('play-recording')
-def socket_play_recording():
-    keyboard.play_recording()
-    socketio.emit('play-recording-received', {'success': True})
+@socketio.on('start-playback')
+def socket_start_playback():
+    keyboard.start_playback()
+    socketio.emit('start-playback-received', {'success': True})
 
-@socketio.on('end-playing')
-def socket_end_playing():
-    keyboard.end_playing()
-    socketio.emit('end-playing-received', {'success': True})
+
+@socketio.on('stop-playback')
+def socket_stop_playback():
+    keyboard.stop_playback()
+    socketio.emit('stop-playback-received', {'success': True})
 
 
 @socketio.on('connect')

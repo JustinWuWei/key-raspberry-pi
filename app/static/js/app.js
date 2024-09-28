@@ -161,12 +161,12 @@ function loadRecording () {
   socket.emit('load-recording', loadFileName);
 }
 
-function endPlaying () {
-  socket.emit('end-playing');
+function stopPlayback () {
+  socket.emit('stop-playback');
 }
 
-function playRecording () {
-  socket.emit('play-recording');
+function startPlayback () {
+  socket.emit('start-playback');
 }
 
 document.querySelector('body').addEventListener("keydown", onKeyDown);

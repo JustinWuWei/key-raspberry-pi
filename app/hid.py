@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
+import os
 from typing import List, Dict
+import threading
 import logging
 import time
 import json
@@ -8,12 +10,13 @@ import json
 @dataclass
 class KeyboardEmulator:
     hid_path: str
+    dir_path = './recordDir/'
     logger: logging.Logger  # 接收传入的 Logger
     current_keys: List[int] = field(default_factory=list)  # 当前按住的按键
     control_keys: int = 0  # 修饰键状态
     recording: List[Dict] = field(default_factory=list)  # 用于存储录制的按键事件
     is_record: bool = False
-    is_end_playing: bool = False
+    is_stop_playback: threading.Event = field(default_factory=threading.Event)  # 用于控制按键回放
 
 
     def send(self):
@@ -40,7 +43,6 @@ class KeyboardEmulator:
         """
         # 更新修饰键状态
         self.control_keys = control_keys
-        # self.control_keys |= control_keys
 
         # 如果是普通按键，将其添加到 current_keys 中（确保按键不会重复添加）
         if hid_keycode and hid_keycode not in self.current_keys:
@@ -60,8 +62,6 @@ class KeyboardEmulator:
         :param hid_keycode: 普通按键键码（可选）
         """
         # 更新修饰键状态，使用按位与操作清除相应的修饰键
-        # if control_keys:
-        #     self.control_keys &= ~control_keys
         self.control_keys = control_keys
 
 
@@ -98,23 +98,28 @@ class KeyboardEmulator:
             start_time = self.recording[0]['timestamp']
             for event in self.recording:
                 event['timestamp'] -= start_time
-        with open(saveFileName, 'w') as f:
+
+        if not os.path.exists(self.dir_path):
+            os.mkdir(self.dir_path)
+        file_full_path = os.path.join(self.dir_path, saveFileName)
+        with open(file_full_path, 'w') as f:
             json.dump(self.recording, f, indent=4)
         self.recording = []
-        self.logger.info(f"Recording saved to {saveFileName}")
+        self.logger.info(f"Recording saved to {file_full_path}")
 
 
     def load_recording(self, loadFileName = "testRecord.json"):
         """
         从文件加载录制的按键事件。
         """
-        with open(loadFileName, 'r') as f:
+        file_full_path = os.path.join(self.dir_path, loadFileName)
+        with open(file_full_path, 'r') as f:
             self.recording = json.load(f)
         
-        self.logger.info(f"Recording loaded from {loadFileName}")
+        self.logger.info(f"Recording loaded from {file_full_path}")
 
 
-    def play_recording(self):
+    def __play_recording(self):
         """
         按照录制的顺序播放按键事件。
         """
@@ -123,9 +128,11 @@ class KeyboardEmulator:
             return
 
         start_time = time.time()
+        self.is_stop_playback.clear()  # 重置停止事件
 
         for event in self.recording:
-            if self.is_end_playing == True:
+            if self.is_stop_playback.is_set():
+                self.logger.info("Playback stopped.")
                 break
             # 计算需要等待的时间
             time_to_wait = event['timestamp'] - (time.time() - start_time)
@@ -136,16 +143,23 @@ class KeyboardEmulator:
                 self.press_key(event['control_keys'], event['keycode'])
             elif event['event'] == "release":
                 self.release_key(event['control_keys'], event['keycode'])
-        if self.is_end_playing == True:
-            self.recording = []
-        self.is_end_playing = False
         self.logger.info("Finished playing recording.")
 
-    def end_playing(self):
+
+    def start_playback(self):
         """
-        清空正在播放的按键
+        开始按键回放
         """
-        self.is_end_playing = True
+        playback_thread = threading.Thread(target=self.__play_recording)
+        playback_thread.start()
+
+
+    def stop_playback(self):
+        """
+        结束按键回放
+        """
+        self.is_stop_playback.set()
+
 
     def __record_event(self,control_keys, hid_keycode, event_type):
         event = {
